@@ -18,7 +18,6 @@ export default function Enter() {
 
     checkUser();
   }, []);
-  console.log("hi???");
 
   const handleSignIn = () => {
     if (notionAuthURL) {
@@ -34,8 +33,6 @@ export default function Enter() {
           alt="In a Flash logo"
           width={440}
           height={0}
-          // sizes="100vw"
-          // style={{width: '64%', height: 'auto'}}
         />
         <h2 className="font-sans text-3xl text-center mt-2">notion to flashcards</h2>
         <button onClick={handleSignIn} className="border-2 border-black rounded-lg py-1 px-4 text-2xl font-sans mt-8 transition-colors duration-300 ease-in-out hover:text-[#DC59A0] hover:border-[#DC59A0]">Sign in with Notion</button>

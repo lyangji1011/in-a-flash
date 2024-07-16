@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
 import type { BotUserObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 import cookie from "cookie";
+import prisma from "@/utils/prisma";
 
 let refreshTokens = [];
 
@@ -9,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const clientId = process.env.AUTH_CLIENT_ID;
     const clientSecret = process.env.AUTH_CLIENT_SECRET;
-    
+
     const { code, error } = req.query;
 
     if (error) {
@@ -39,7 +40,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!tokens || !tokens.jwtToken || !tokens.refreshToken) {
       return res.status(500).json({ error: "JWT token could not be created"});
     }
-    console.log(tokens);
+
+    console.log("before");
+    const x = await addUserToDB(userInfo);
+    console.log("after")
 
     res.setHeader("Set-Cookie", cookie.serialize("jwt", tokens?.jwtToken, {
       httpOnly: true,
@@ -55,11 +59,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
+async function addUserToDB(userInfo: BotUserObjectResponse) {
+  if (userInfo.bot.owner.type === "user") {
+    try {
+      const firstName = userInfo.bot.owner.user.name?.split(" ")[0];
+      const lastName = userInfo.bot.owner.user.name?.split(" ")[1];
+      const email = userInfo.bot.owner.user.person.email;
+
+      const user = await prisma.user.create({
+        data: {
+          firstName: firstName, 
+          lastName: lastName, 
+          email: email,
+        }
+      });
+
+      return user
+    } catch(e) {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}
+
 function generateJWT(accessToken: string, userInfo: BotUserObjectResponse) {
   if (userInfo.bot.owner.type === "user" && process.env.ACCESS_TOKEN_SECRET && process.env.REFRESH_TOKEN_SECRET) {
     const payload = {
       "firstName": userInfo.bot.owner.user.name?.split(" ")[0],
-      "lastName": userInfo.bot.owner.user.name?.split(" ")[-1],
+      "lastName": userInfo.bot.owner.user.name?.split(" ")[1],
       "email": userInfo.bot.owner.user.person.email,
       "accessToken": accessToken,
     }
