@@ -35,15 +35,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const data = await response.json();
     const userInfo = await getUserInfo(data.access_token);
+    console.log(userInfo)
     const tokens = generateJWT(data.access_token, userInfo);
 
     if (!tokens || !tokens.jwtToken || !tokens.refreshToken) {
       return res.status(500).json({ error: "JWT token could not be created"});
     }
 
-    console.log("before");
     const x = await addUserToDB(userInfo);
-    console.log("after")
 
     res.setHeader("Set-Cookie", cookie.serialize("jwt", tokens?.jwtToken, {
       httpOnly: true,
@@ -65,12 +64,14 @@ async function addUserToDB(userInfo: BotUserObjectResponse) {
       const firstName = userInfo.bot.owner.user.name?.split(" ")[0];
       const lastName = userInfo.bot.owner.user.name?.split(" ")[1];
       const email = userInfo.bot.owner.user.person.email;
+      const id = userInfo.bot.owner.user.id;
 
       const user = await prisma.user.create({
         data: {
           firstName: firstName, 
           lastName: lastName, 
           email: email,
+          id: id,
         }
       });
 
@@ -90,6 +91,7 @@ function generateJWT(accessToken: string, userInfo: BotUserObjectResponse) {
       "lastName": userInfo.bot.owner.user.name?.split(" ")[1],
       "email": userInfo.bot.owner.user.person.email,
       "accessToken": accessToken,
+      "id": userInfo.bot.owner.user.id,
     }
     const jwtToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET)
     const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET);
