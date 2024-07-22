@@ -13,8 +13,8 @@ export default function Home() {
     async function verifyUser() {
       try {
         const response = await fetch("/api/auth/verify", {
-          method: "POST", 
-        })
+          method: "POST",
+        });
         if (!response.ok) {
           router.push("/enter");
         }
@@ -26,27 +26,37 @@ export default function Home() {
     }
 
     verifyUser();
-  }, [])
+  }, []);
 
   const createSet = () => {
     router.push("/generate");
-  }
+  };
 
   return (
     <div>
       <Header name={user?.firstName} />
-      {
-        sets.length === 0 ? 
-          <div className="flex flex-col justify-center min-h-screen items-center">
-            <p className="text-center text-zinc-500 text-xl">You don't have any sets!</p>
-            <p className="text-center text-zinc-500 text-xl">Create your first set by clicking below:</p>
-            <Image onClick={createSet} className="mt-4 hover:cursor-pointer" src="/plus.png" alt="create-set" height={44} width={44} />
-          </div>
-        :
-          <div>
-            <p>populate with sets</p>
-          </div>
-      }
+      {sets.length === 0 ? (
+        <div className="flex flex-col justify-center min-h-screen items-center">
+          <p className="text-center text-zinc-500 text-xl">
+            You don't have any sets!
+          </p>
+          <p className="text-center text-zinc-500 text-xl">
+            Create your first set by clicking below:
+          </p>
+          <Image
+            onClick={createSet}
+            className="mt-4 hover:cursor-pointer"
+            src="/plus.png"
+            alt="create-set"
+            height={44}
+            width={44}
+          />
+        </div>
+      ) : (
+        <div>
+          <p>populate with sets</p>
+        </div>
+      )}
     </div>
   );
 }

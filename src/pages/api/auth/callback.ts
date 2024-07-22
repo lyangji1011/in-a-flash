@@ -1,12 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
-import type { BotUserObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import type { BotUserObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import cookie from "cookie";
 import prisma from "@/utils/prisma";
 
 let refreshTokens = [];
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   try {
     const clientId = process.env.AUTH_CLIENT_ID;
     const clientSecret = process.env.AUTH_CLIENT_SECRET;
@@ -17,40 +20,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.redirect("/enter");
     }
 
-    const encoded = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+    const encoded = Buffer.from(`${clientId}:${clientSecret}`).toString(
+      "base64"
+    );
 
     const response = await fetch("https://api.notion.com/v1/oauth/token", {
-      method: "POST", 
+      method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
         Authorization: `Basic ${encoded}`,
-      }, 
+      },
       body: JSON.stringify({
         grant_type: "authorization_code",
-        code: code, 
+        code: code,
         redirect_uri: "http://localhost:3001/api/auth/callback",
-      })
-    })
+      }),
+    });
 
     const data = await response.json();
     const userInfo = await getUserInfo(data.access_token);
-    console.log(userInfo)
+
     const tokens = generateJWT(data.access_token, userInfo);
 
     if (!tokens || !tokens.jwtToken || !tokens.refreshToken) {
-      return res.status(500).json({ error: "JWT token could not be created"});
+      return res.status(500).json({ error: "JWT token could not be created" });
     }
 
-    const x = await addUserToDB(userInfo);
+    await addUserToDB(userInfo);
 
-    res.setHeader("Set-Cookie", cookie.serialize("jwt", tokens?.jwtToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV !== "development", 
-      maxAge: 60 * 60, 
-      sameSite: "lax", 
-      path: "/"
-    }))
+    res.setHeader(
+      "Set-Cookie",
+      cookie.serialize("jwt", tokens?.jwtToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== "development",
+        maxAge: 60 * 60,
+        sameSite: "lax",
+        path: "/",
+      })
+    );
 
     res.redirect("/");
   } catch (e) {
@@ -59,44 +67,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 async function addUserToDB(userInfo: BotUserObjectResponse) {
-  if (userInfo.bot.owner.type === "user") {
+  if (userInfo.bot.owner.type === "user" && "name" in userInfo.bot.owner.user) {
     try {
       const firstName = userInfo.bot.owner.user.name?.split(" ")[0];
       const lastName = userInfo.bot.owner.user.name?.split(" ")[1];
       const email = userInfo.bot.owner.user.person.email;
       const id = userInfo.bot.owner.user.id;
 
-      const user = await prisma.user.create({
+      await prisma.user.create({
         data: {
-          firstName: firstName, 
-          lastName: lastName, 
+          firstName: firstName,
+          lastName: lastName,
           email: email,
           id: id,
-        }
+        },
       });
-
-      return user
-    } catch(e) {
-      return false;
+    } catch (e) {
+      console.log(e);
     }
-  } else {
-    return false;
   }
 }
 
 function generateJWT(accessToken: string, userInfo: BotUserObjectResponse) {
-  if (userInfo.bot.owner.type === "user" && process.env.ACCESS_TOKEN_SECRET && process.env.REFRESH_TOKEN_SECRET) {
+  if (
+    userInfo.bot.owner.type === "user" &&
+    process.env.ACCESS_TOKEN_SECRET &&
+    process.env.REFRESH_TOKEN_SECRET &&
+    "name" in userInfo.bot.owner.user
+  ) {
     const payload = {
-      "firstName": userInfo.bot.owner.user.name?.split(" ")[0],
-      "lastName": userInfo.bot.owner.user.name?.split(" ")[1],
-      "email": userInfo.bot.owner.user.person.email,
-      "accessToken": accessToken,
-      "id": userInfo.bot.owner.user.id,
-    }
-    const jwtToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET)
+      firstName: userInfo.bot.owner.user.name?.split(" ")[0],
+      lastName: userInfo.bot.owner.user.name?.split(" ")[1],
+      email: userInfo.bot.owner.user.person.email,
+      accessToken: accessToken,
+      id: userInfo.bot.owner.user.id,
+    };
+    const jwtToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET);
     const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET);
     refreshTokens.push(refreshToken);
-    return {jwtToken: jwtToken, refreshToken: refreshToken};
+    return { jwtToken: jwtToken, refreshToken: refreshToken };
   }
   return null;
 }
@@ -107,7 +116,7 @@ async function getUserInfo(accessToken: string) {
     headers: {
       "Notion-Version": "2022-06-28",
       Authorization: `Bearer ${accessToken}`,
-    }
+    },
   });
 
   return await response.json();
