@@ -1,5 +1,5 @@
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { Checkbox, CheckboxGroup, Stack } from "@chakra-ui/react";
+import { Checkbox, CheckboxGroup, Spinner, Stack } from "@chakra-ui/react";
 import { SetStateAction, Dispatch } from "react";
 import { ChevronRightIcon } from "@chakra-ui/icons";
 
@@ -7,6 +7,7 @@ interface Props {
   pages: PageObjectResponse[];
   selectedPages: PageObjectResponse[];
   setSelectedPages: Dispatch<SetStateAction<PageObjectResponse[]>>;
+  slide: number;
   setSlide: Dispatch<SetStateAction<number>>;
 }
 
@@ -14,6 +15,7 @@ export default function SelectPages({
   pages,
   selectedPages,
   setSelectedPages,
+  slide,
   setSlide,
 }: Props) {
   const handleClick = (page: PageObjectResponse) => {
@@ -28,42 +30,67 @@ export default function SelectPages({
     }
   };
 
-  const nextSlide = () => {
+  const generate = async () => {
     setSlide(1);
+    console.log("generating");
+    const response = await fetch("/api/card", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        pages: selectedPages,
+      }),
+    });
+    const data = await response.json();
+    console.log(data);
+    // setSlide(2);
   };
 
-  return (
-    <div className="flex flex-col justify-center min-h-screen items-center">
-      <div className="bg-white rounded-xl px-10 py-8">
-        <p className="text-center mb-4 text-lg">
-          Select pages to make a flashcard set with:
-        </p>
-        <CheckboxGroup colorScheme="pink" size="lg">
-          <Stack spacing="10px">
-            {pages
-              ? pages.map((page, index) => {
-                  if (page.properties.title.type === "title") {
-                    return (
-                      <Checkbox
-                        iconSize="lg"
-                        onChange={() => handleClick(page)}
-                        key={index}
-                      >
-                        {page.properties.title.title[0].plain_text}
-                      </Checkbox>
-                    );
-                  }
-                })
-              : null}
-          </Stack>
-        </CheckboxGroup>
-      </div>
-      <button onClick={nextSlide} className="mt-6">
-        <div className="flex flex-row items-center">
-          <p className="mr-1">Next</p>
-          <ChevronRightIcon boxSize={5} />
+  if (slide === 0) {
+    return (
+      <div className="flex flex-col justify-center min-h-screen items-center py-20">
+        <div className="bg-white rounded-xl px-10 py-8">
+          <p className="text-center mb-4 text-lg">
+            Select pages to make a flashcard set with:
+          </p>
+          <CheckboxGroup colorScheme="pink" size="lg">
+            <Stack spacing="10px">
+              {pages
+                ? pages.map((page, index) => {
+                    if (
+                      page.properties.title &&
+                      page.properties.title.type === "title"
+                    ) {
+                      return (
+                        <Checkbox
+                          iconSize="lg"
+                          onChange={() => handleClick(page)}
+                          key={index}
+                        >
+                          {page.properties.title.title[0].plain_text}
+                        </Checkbox>
+                      );
+                    }
+                  })
+                : null}
+            </Stack>
+          </CheckboxGroup>
         </div>
-      </button>
-    </div>
-  );
+        <button onClick={generate} className="mt-6">
+          <div className="flex flex-row items-center">
+            <p className="mr-1">Next</p>
+            <ChevronRightIcon boxSize={5} />
+          </div>
+        </button>
+      </div>
+    );
+  } else if (slide === 1) {
+    return (
+      <div className="flex flex-col justify-center min-h-screen items-center">
+        <p className="mb-6 text-lg">Your flashcard set is being generated</p>
+        <Spinner />
+      </div>
+    );
+  }
 }

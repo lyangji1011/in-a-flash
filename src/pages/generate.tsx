@@ -59,15 +59,16 @@ export default function generate() {
   return (
     <div>
       <Header name={user?.firstName} />
-      {slide === 0 ? (
+      {slide <= 1 ? (
         <SelectPages
           pages={pages}
           selectedPages={selectedPages}
           setSelectedPages={setSelectedPages}
+          slide={slide}
           setSlide={setSlide}
         />
       ) : null}
-      {slide === 1 ? <InProgress /> : null}
+      {/* {slide === 1 ? <InProgress /> : null} */}
     </div>
   );
 }
