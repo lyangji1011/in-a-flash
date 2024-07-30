@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { User } from "@/utils/types/User";
+import { User } from "@/utils/types";
 import { useRouter } from "next/router";
 import Header from "@/components/Header";
 import Image from "next/image";

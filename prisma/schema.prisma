@@ -8,8 +8,25 @@ generator client {
 }
 
 model User {
-  id         String  
-  firstName  String?
-  lastName   String?
-  email      String  @unique
+  id             String           @unique
+  firstName      String?
+  lastName       String?
+  email          String           @unique
+  flashcardSets  FlashcardSet[]
+}
+
+model FlashcardSet {
+  id          Int          @id @default(autoincrement())
+  name        String?
+  flashcards  Flashcard[]
+  user        User         @relation(fields: [userId], references: [id])
+  userId      String
+}
+
+model Flashcard {
+  id        Int           @id @default(autoincrement())
+  question  String
+  answer    String
+  set       FlashcardSet  @relation(fields: [setId], references: [id])
+  setId     Int
 }

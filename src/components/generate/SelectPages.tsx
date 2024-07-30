@@ -2,6 +2,7 @@ import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { Checkbox, CheckboxGroup, Spinner, Stack } from "@chakra-ui/react";
 import { SetStateAction, Dispatch } from "react";
 import { ChevronRightIcon } from "@chakra-ui/icons";
+import { Flashcard } from "@/utils/types";
 
 interface Props {
   pages: PageObjectResponse[];
@@ -9,6 +10,7 @@ interface Props {
   setSelectedPages: Dispatch<SetStateAction<PageObjectResponse[]>>;
   slide: number;
   setSlide: Dispatch<SetStateAction<number>>;
+  setSet: Dispatch<SetStateAction<Flashcard[]>>;
 }
 
 export default function SelectPages({
@@ -17,6 +19,7 @@ export default function SelectPages({
   setSelectedPages,
   slide,
   setSlide,
+  setSet,
 }: Props) {
   const handleClick = (page: PageObjectResponse) => {
     if (selectedPages.includes(page)) {
@@ -43,8 +46,8 @@ export default function SelectPages({
       }),
     });
     const data = await response.json();
-    console.log(data);
-    // setSlide(2);
+    setSet(data.cards);
+    setSlide(2);
   };
 
   if (slide === 0) {

@@ -1,17 +1,20 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Header from "@/components/Header";
-import { User } from "@/utils/types/User";
+import { User, Flashcard } from "@/utils/types";
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import SelectPages from "@/components/generate/SelectPages";
-import InProgress from "@/components/generate/InProgress";
+import NameSet from "@/components/generate/NameSet";
 
 export default function generate() {
   const router = useRouter();
   const [user, setUser] = useState<User | undefined>(undefined);
   const [pages, setPages] = useState([]);
   const [selectedPages, setSelectedPages] = useState<PageObjectResponse[]>([]);
-  const [slide, setSlide] = useState(0);
+  // const [slide, setSlide] = useState(0);
+  const [slide, setSlide] = useState(2);
+  const [set, setSet] = useState<Flashcard[]>([]);
+  const [setName, setSetName] = useState("");
 
   useEffect(() => {
     async function verifyUser() {
@@ -56,19 +59,39 @@ export default function generate() {
     }
   }, [user]);
 
-  return (
-    <div>
-      <Header name={user?.firstName} />
-      {slide <= 1 ? (
-        <SelectPages
-          pages={pages}
-          selectedPages={selectedPages}
-          setSelectedPages={setSelectedPages}
-          slide={slide}
-          setSlide={setSlide}
-        />
-      ) : null}
-      {/* {slide === 1 ? <InProgress /> : null} */}
-    </div>
-  );
+  switch (slide) {
+    case 0:
+    case 1:
+      return (
+        <div>
+          <Header name={user?.firstName} />
+          <SelectPages
+            pages={pages}
+            selectedPages={selectedPages}
+            setSelectedPages={setSelectedPages}
+            slide={slide}
+            setSlide={setSlide}
+            setSet={setSet}
+          />
+        </div>
+      );
+    case 2:
+      return (
+        <div>
+          <Header name={user?.firstName} />
+          <NameSet
+            setName={setName}
+            setSetName={setSetName}
+            setSlide={setSlide}
+          />
+        </div>
+      );
+    // case 3:
+    //   return (
+    //     <div>
+    //       <Header name={user?.firstName} />
+
+    //     </div>
+    //   );
+  }
 }

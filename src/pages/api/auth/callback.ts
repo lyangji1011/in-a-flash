@@ -74,14 +74,22 @@ async function addUserToDB(userInfo: BotUserObjectResponse) {
       const email = userInfo.bot.owner.user.person.email;
       const id = userInfo.bot.owner.user.id;
 
-      await prisma.user.create({
+      const user = await prisma.user.create({
         data: {
           firstName: firstName,
           lastName: lastName,
           email: email,
           id: id,
+          flashcardSets: {
+            create: [],
+          },
         },
       });
+      console.log(user);
+
+      const users = await prisma.user.findMany();
+      console.log(users);
+      return user;
     } catch (e) {
       console.log(e);
     }

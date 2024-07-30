@@ -14,6 +14,8 @@ import { Client } from "@notionhq/client";
 import cookie from "cookie";
 import jwt from "jsonwebtoken";
 import OpenAI from "openai";
+import prisma from "@/utils/prisma";
+import { Flashcard } from "@/utils/types";
 
 export default async function handler(
   req: NextApiRequest,
@@ -31,6 +33,7 @@ export default async function handler(
       return res.status(500);
     }
 
+    const userId = decoded.id;
     const notion = new Client({ auth: decoded.accessToken });
     const pageIds = req.body.pages.map((page: PageObjectResponse) => {
       return page.id;
@@ -47,7 +50,7 @@ export default async function handler(
       "paragraph",
     ];
 
-    pageIds.forEach(async (pageId: string) => {
+    for (const pageId of pageIds) {
       const page = await notion.blocks.children.list({
         block_id: pageId,
       });
@@ -97,10 +100,57 @@ export default async function handler(
       if (pageContent) {
         content.push(pageContent);
       }
+    }
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
     });
 
-    // connect to openai and prompt with content
-    return res.status(200).json({ data: content });
+    let flashcards = [];
+    const prompt =
+      'Provided is a paragraph of notes. Your task is to create flashcards from this paragraph. Create a list [] of JSON-style objects in the form {"question": <question>, "answer": <answer>} from the paragraph. Do not actually convert to JSON, leave your response as a string where JSON.parse() can be used directly.';
+    for (const page of content) {
+      const completion = await openai.chat.completions.create({
+        messages: [{ role: "system", content: `${prompt}. \n\n ${page}` }],
+        model: "gpt-4o-mini",
+      });
+      if (completion.choices[0].message.content) {
+        const data = JSON.parse(completion.choices[0].message.content);
+        flashcards.push(...data);
+      }
+    }
+
+    const set = await prisma.flashcardSet.create({
+      data: {
+        flashcards: {
+          create: [],
+        },
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+    });
+
+    let result: Flashcard[] = [];
+    for (const bareCard of flashcards) {
+      const card = await prisma.flashcard.create({
+        data: {
+          question: bareCard.question,
+          answer: bareCard.answer,
+          set: {
+            connect: {
+              id: set.id,
+            },
+          },
+        },
+      });
+      result.push(card);
+    }
+
+    return res.status(200).json({ cards: result });
+  } else if (req.method === "PATCH") {
   } else {
     return res.status(400);
   }
