@@ -16,7 +16,7 @@ export default function Header({ name }: Props) {
   };
 
   return (
-    <div className="bg-white fixed flex flex-row w-full py-4 justify-between px-[8vw] md:px-[13vw] border-b-2 border-slate-200">
+    <div className="z-50 bg-white fixed flex flex-row w-full py-4 justify-between px-[8vw] md:px-[13vw] border-b-2 border-slate-200">
       <Image src="/logo.png" alt="logo" width={160} height={18} />
       <div className="flex flex-row align-center">
         {name ? <p>Hey, {name}!</p> : null}
