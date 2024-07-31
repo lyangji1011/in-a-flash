@@ -4,7 +4,6 @@ import { useRouter } from "next/router";
 import NoSets from "@/components/dashboard/NoSets";
 import SetsDisplay from "@/components/dashboard/SetsDisplay";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { Input } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 import { FlashcardSet } from "@prisma/client";
@@ -106,7 +105,6 @@ export default function Home() {
           <SetsDisplay sets={filteredSets} />
         </div>
       )}
-      <Footer />
     </div>
   );
 }
