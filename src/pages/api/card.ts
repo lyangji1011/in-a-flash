@@ -150,6 +150,20 @@ export default async function handler(
     }
 
     return res.status(200).json({ cards: result });
+  } else if (req.method === "GET") {
+    if (req.query.setId) {
+      const setId = Array.isArray(req.query.setId)
+        ? req.query.setId[0]
+        : req.query.setId;
+      const cards = await prisma.flashcard.findMany({
+        where: {
+          setId: parseInt(setId),
+        },
+      });
+      return res.status(200).json({ data: cards });
+    } else {
+      return res.status(400);
+    }
   } else {
     return res.status(400);
   }

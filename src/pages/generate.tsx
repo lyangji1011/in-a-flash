@@ -94,7 +94,11 @@ export default function generate() {
       } else {
         router.push("/error");
       }
-    // case 3:
-    //   router.push(`/set/${set.id}`);
+    case 3:
+      if (set) {
+        router.push(`/set/${set.id}`);
+      } else {
+        router.push("/error");
+      }
   }
 }
