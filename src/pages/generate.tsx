@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Header from "@/components/Header";
-import { User, Flashcard } from "@/utils/types";
+import { FlashcardSet } from "@prisma/client";
+import { User } from "@/utils/types";
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import SelectPages from "@/components/generate/SelectPages";
 import NameSet from "@/components/generate/NameSet";
@@ -13,7 +14,7 @@ export default function generate() {
   const [selectedPages, setSelectedPages] = useState<PageObjectResponse[]>([]);
   // const [slide, setSlide] = useState(0);
   const [slide, setSlide] = useState(2);
-  const [set, setSet] = useState<Flashcard[]>([]);
+  const [set, setSet] = useState<FlashcardSet>();
   const [setName, setSetName] = useState("");
 
   useEffect(() => {
@@ -62,36 +63,38 @@ export default function generate() {
   switch (slide) {
     case 0:
     case 1:
-      return (
-        <div>
-          <Header name={user?.firstName} />
-          <SelectPages
-            pages={pages}
-            selectedPages={selectedPages}
-            setSelectedPages={setSelectedPages}
-            slide={slide}
-            setSlide={setSlide}
-            setSet={setSet}
-          />
-        </div>
-      );
+      if (set) {
+        return (
+          <div>
+            <Header name={user?.firstName} />
+            <SelectPages
+              pages={pages}
+              selectedPages={selectedPages}
+              setSelectedPages={setSelectedPages}
+              slide={slide}
+              setSlide={setSlide}
+              setSet={setSet}
+            />
+          </div>
+        );
+      } else {
+        router.push("/error");
+      }
     case 2:
-      return (
+      if (set) {
         <div>
           <Header name={user?.firstName} />
           <NameSet
+            set={set}
             setName={setName}
             setSetName={setSetName}
             setSlide={setSlide}
           />
-        </div>
-      );
+        </div>;
+      } else {
+        router.push("/error");
+      }
     // case 3:
-    //   return (
-    //     <div>
-    //       <Header name={user?.firstName} />
-
-    //     </div>
-    //   );
+    //   router.push(`/set/${set.id}`);
   }
 }

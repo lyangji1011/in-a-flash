@@ -15,7 +15,7 @@ import cookie from "cookie";
 import jwt from "jsonwebtoken";
 import OpenAI from "openai";
 import prisma from "@/utils/prisma";
-import { Flashcard } from "@/utils/types";
+import { Flashcard } from "@prisma/client";
 
 export default async function handler(
   req: NextApiRequest,
@@ -150,7 +150,6 @@ export default async function handler(
     }
 
     return res.status(200).json({ cards: result });
-  } else if (req.method === "PATCH") {
   } else {
     return res.status(400);
   }

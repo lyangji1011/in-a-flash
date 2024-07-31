@@ -2,21 +2,23 @@ import { Dispatch, SetStateAction } from "react";
 import { Input } from "@chakra-ui/react";
 import { ChevronRightIcon } from "@chakra-ui/icons";
 import { useToast } from "@chakra-ui/react";
+import { Flashcard, FlashcardSet } from "@prisma/client";
 
 interface Props {
+  set: FlashcardSet;
   setName: string;
   setSetName: Dispatch<SetStateAction<string>>;
   setSlide: Dispatch<SetStateAction<number>>;
 }
 
-export default function NameSet({ setName, setSetName, setSlide }: Props) {
+export default function NameSet({ set, setName, setSetName, setSlide }: Props) {
   const toast = useToast();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSetName(event.target.value);
   };
 
-  const nextSlide = () => {
+  const nextSlide = async () => {
     if (setName.length === 0) {
       toast({
         title: "Missing name.",
@@ -26,6 +28,17 @@ export default function NameSet({ setName, setSetName, setSlide }: Props) {
         isClosable: true,
       });
     } else {
+      const response = await fetch("/api/card", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: set.id, // TODO: change this to pass in the set id, not the card id
+          name: setName,
+        }),
+      });
+      const data = await response.json();
       setSlide(3);
     }
   };

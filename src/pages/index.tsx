@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { User } from "@/utils/types";
 import { useRouter } from "next/router";
+import NoSets from "@/components/dashboard/NoSets";
+import SetsDisplay from "@/components/dashboard/SetsDisplay";
 import Header from "@/components/Header";
-import Image from "next/image";
 
 export default function Home() {
   const [user, setUser] = useState<User | undefined>(undefined);
@@ -28,33 +29,34 @@ export default function Home() {
     verifyUser();
   }, []);
 
-  const createSet = () => {
-    router.push("/generate");
-  };
+  useEffect(() => {
+    async function fetchSets() {
+      try {
+        const response = await fetch(`/api/set?userId=${user?.id}`, {
+          method: "GET",
+        });
+        const data = await response.json();
+        console.log(data);
+        setSets(data.data);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
+    if (user) {
+      fetchSets();
+    }
+  }, [user]);
 
   return (
     <div>
-      <Header name={user?.firstName} />
+      {/* <Header name={user?.firstName} /> */}
       {sets.length === 0 ? (
-        <div className="flex flex-col justify-center min-h-screen items-center">
-          <p className="text-center text-zinc-500 text-xl">
-            You don't have any sets!
-          </p>
-          <p className="text-center text-zinc-500 text-xl">
-            Create your first set by clicking below:
-          </p>
-          <Image
-            onClick={createSet}
-            className="mt-4 hover:cursor-pointer"
-            src="/plus.png"
-            alt="create-set"
-            height={44}
-            width={44}
-          />
-        </div>
+        <NoSets />
       ) : (
-        <div>
-          <p>populate with sets</p>
+        <div className="mx-[8vw] md:mx-[13vw]">
+          <h1 className="text-5xl	font-bold mb-6">Your sets</h1>
+          <SetsDisplay sets={sets} />
         </div>
       )}
     </div>
