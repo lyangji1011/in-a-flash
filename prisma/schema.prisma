@@ -30,3 +30,7 @@ model Flashcard {
   set       FlashcardSet  @relation(fields: [setId], references: [id])
   setId     Int
 }
+
+model Token {
+  token  String  @unique
+}

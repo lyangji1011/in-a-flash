@@ -22,7 +22,6 @@
     "jsonwebtoken": "^9.0.2",
     "next": "14.2.4",
     "openai": "^4.53.1",
-    "prisma": "^5.16.2",
     "react": "^18",
     "react-dom": "^18"
   },
@@ -33,6 +32,7 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18",
     "postcss": "^8",
+    "prisma": "^5.17.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }

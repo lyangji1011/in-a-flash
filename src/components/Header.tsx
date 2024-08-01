@@ -9,10 +9,19 @@ interface Props {
 export default function Header({ name }: Props) {
   const router = useRouter();
   const handleSignOut = async () => {
-    // await fetch("/api/logout", {
-    //   method: "POST",
-    // });
-    // router.push("/enter");
+    const response = await fetch("/api/auth/verify");
+    const token = await response.json();
+    console.log(token.token);
+    await fetch("/api/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        token: token.token,
+      }),
+    });
+    router.push("/enter");
   };
 
   const toDashboard = () => {
