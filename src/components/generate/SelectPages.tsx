@@ -51,7 +51,7 @@ export default function SelectPages({
 
   if (slide === 0) {
     return (
-      <div className="flex flex-col justify-center min-h-screen items-center py-20">
+      <div className="flex flex-col justify-center items-center pt-[25vh]">
         <div className="bg-white rounded-xl px-10 py-8">
           <p className="text-center mb-4 text-lg">
             Select pages to make a flashcard set with:
