@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Header from "@/components/Header";
-import { FlashcardSet } from "@prisma/client";
+import { Flashcard } from "@prisma/client";
 import { User } from "@/utils/types";
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import SelectPages from "@/components/generate/SelectPages";
@@ -12,9 +12,9 @@ export default function generate() {
   const [user, setUser] = useState<User | undefined>(undefined);
   const [pages, setPages] = useState([]);
   const [selectedPages, setSelectedPages] = useState<PageObjectResponse[]>([]);
-  // const [slide, setSlide] = useState(0);
-  const [slide, setSlide] = useState(2);
-  const [set, setSet] = useState<FlashcardSet>();
+  const [slide, setSlide] = useState(0);
+  // const [slide, setSlide] = useState(2);
+  const [set, setSet] = useState<Flashcard[]>();
   const [setName, setSetName] = useState("");
 
   useEffect(() => {
@@ -43,7 +43,6 @@ export default function generate() {
         try {
           const response = await fetch(`/api/notion/search`);
           const data = await response.json();
-          console.log(data.data);
           setPages(
             data.data.filter((page: PageObjectResponse) => {
               return page.created_by.id === user.id;
@@ -63,42 +62,36 @@ export default function generate() {
   switch (slide) {
     case 0:
     case 1:
+      return (
+        <div>
+          <Header name={user?.firstName} />
+          <SelectPages
+            pages={pages}
+            selectedPages={selectedPages}
+            setSelectedPages={setSelectedPages}
+            slide={slide}
+            setSlide={setSlide}
+            setSet={setSet}
+          />
+        </div>
+      );
+    case 2:
       if (set) {
         return (
           <div>
             <Header name={user?.firstName} />
-            <SelectPages
-              pages={pages}
-              selectedPages={selectedPages}
-              setSelectedPages={setSelectedPages}
-              slide={slide}
+            <NameSet
+              set={set}
+              setName={setName}
+              setSetName={setSetName}
               setSlide={setSlide}
-              setSet={setSet}
             />
           </div>
         );
-      } else {
-        router.push("/error");
-      }
-    case 2:
-      if (set) {
-        <div>
-          <Header name={user?.firstName} />
-          <NameSet
-            set={set}
-            setName={setName}
-            setSetName={setSetName}
-            setSlide={setSlide}
-          />
-        </div>;
-      } else {
-        router.push("/error");
       }
     case 3:
       if (set) {
-        router.push(`/set/${set.id}`);
-      } else {
-        router.push("/error");
+        router.push(`/set/${set[0].setId}`);
       }
   }
 }

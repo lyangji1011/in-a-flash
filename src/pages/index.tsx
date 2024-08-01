@@ -4,8 +4,8 @@ import { useRouter } from "next/router";
 import NoSets from "@/components/dashboard/NoSets";
 import SetsDisplay from "@/components/dashboard/SetsDisplay";
 import Header from "@/components/Header";
-import { Input } from "@chakra-ui/react";
-import { SearchIcon } from "@chakra-ui/icons";
+import { Button, Input } from "@chakra-ui/react";
+import { AddIcon, SearchIcon } from "@chakra-ui/icons";
 import { FlashcardSet } from "@prisma/client";
 
 export default function Home() {
@@ -74,6 +74,10 @@ export default function Home() {
     }
   };
 
+  const createSet = () => {
+    router.push("/generate");
+  };
+
   return (
     <div>
       <Header name={user?.firstName} />
@@ -84,23 +88,32 @@ export default function Home() {
           <h1 className="text-5xl	font-poppins font-medium mb-3 font-sans">
             Your sets
           </h1>
-          <div className="mb-10 flex flex-row items-center justify-start w-[350px] md:w-[400px] lg:w-[500px]">
-            <Input
-              value={filter}
-              borderRadius={11}
-              style={{ backgroundColor: "white" }}
-              onChange={updateFilter}
-            />
-            <SearchIcon
-              boxSize={6}
-              marginLeft="18px"
-              _hover={{
-                color: "#DC59A0",
-                cursor: "pointer",
-                transition: "color 0.2s ease",
-              }}
-              onClick={applyFilter}
-            />
+          <div className="mb-10 flex flex-row items-center justify-between">
+            <div className="flex flex-row items-center justify-start w-[350px] md:w-[400px] lg:w-[500px]">
+              <Input
+                value={filter}
+                borderRadius={11}
+                style={{ backgroundColor: "white" }}
+                onChange={updateFilter}
+              />
+              <SearchIcon
+                boxSize={6}
+                marginLeft="18px"
+                color="#22206D"
+                _hover={{
+                  cursor: "pointer",
+                }}
+                onClick={applyFilter}
+              />
+            </div>
+            <Button
+              rightIcon={<AddIcon />}
+              onClick={createSet}
+              colorScheme="pink"
+              variant="solid"
+            >
+              Create
+            </Button>
           </div>
           <SetsDisplay sets={filteredSets} />
         </div>

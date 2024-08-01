@@ -15,9 +15,21 @@ export default function Header({ name }: Props) {
     // router.push("/enter");
   };
 
+  const toDashboard = () => {
+    router.push("/");
+  };
+
   return (
     <div className="z-50 bg-white fixed flex flex-row w-full py-4 justify-between px-[8vw] md:px-[13vw] border-b-2 border-slate-200">
-      <Image src="/logo.png" alt="logo" width={160} height={18} />
+      <div className="hover:cursor-pointer">
+        <Image
+          onClick={toDashboard}
+          src="/logo.png"
+          alt="logo"
+          width={160}
+          height={18}
+        />
+      </div>
       <div className="flex flex-row align-center">
         {name ? <p>Hey, {name}!</p> : null}
         <button

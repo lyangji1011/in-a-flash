@@ -6,6 +6,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "PATCH") {
+    console.log(req.body.id);
     const set = await prisma.flashcardSet.update({
       where: {
         id: req.body.id,
@@ -35,7 +36,35 @@ export default async function handler(
           id: parseInt(setId),
         },
       });
+      if (!set) {
+        return res.status(404).json({ error: "Set not found" });
+      }
       return res.status(200).json({ data: set });
+    } else {
+      return res.status(400);
+    }
+  } else if (req.method === "DELETE") {
+    if (req.query.setId) {
+      try {
+        const setId = Array.isArray(req.query.setId)
+          ? req.query.setId[0]
+          : req.query.setId;
+        const deleteCards = prisma.flashcard.deleteMany({
+          where: {
+            setId: parseInt(setId),
+          },
+        });
+        const deleteSet = prisma.flashcardSet.delete({
+          where: {
+            id: parseInt(setId),
+          },
+        });
+        const transaction = await prisma.$transaction([deleteCards, deleteSet]);
+        return res.status(200).json({ data: transaction });
+      } catch (e) {
+        console.log(e);
+        return res.status(500);
+      }
     } else {
       return res.status(400);
     }

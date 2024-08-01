@@ -5,7 +5,7 @@ import { useToast } from "@chakra-ui/react";
 import { Flashcard, FlashcardSet } from "@prisma/client";
 
 interface Props {
-  set: FlashcardSet;
+  set: Flashcard[];
   setName: string;
   setSetName: Dispatch<SetStateAction<string>>;
   setSlide: Dispatch<SetStateAction<number>>;
@@ -28,13 +28,13 @@ export default function NameSet({ set, setName, setSetName, setSlide }: Props) {
         isClosable: true,
       });
     } else {
-      const response = await fetch("/api/card", {
+      const response = await fetch("/api/set", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: set.id, // TODO: change this to pass in the set id, not the card id
+          id: set[0].setId,
           name: setName,
         }),
       });

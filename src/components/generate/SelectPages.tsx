@@ -2,7 +2,7 @@ import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { Checkbox, CheckboxGroup, Spinner, Stack } from "@chakra-ui/react";
 import { SetStateAction, Dispatch } from "react";
 import { ChevronRightIcon } from "@chakra-ui/icons";
-import { FlashcardSet } from "@prisma/client";
+import { Flashcard } from "@prisma/client";
 
 interface Props {
   pages: PageObjectResponse[];
@@ -10,7 +10,7 @@ interface Props {
   setSelectedPages: Dispatch<SetStateAction<PageObjectResponse[]>>;
   slide: number;
   setSlide: Dispatch<SetStateAction<number>>;
-  setSet: Dispatch<SetStateAction<FlashcardSet | undefined>>;
+  setSet: Dispatch<SetStateAction<Flashcard[] | undefined>>;
 }
 
 export default function SelectPages({
@@ -35,7 +35,6 @@ export default function SelectPages({
 
   const generate = async () => {
     setSlide(1);
-    console.log("generating");
     const response = await fetch("/api/card", {
       method: "POST",
       headers: {
